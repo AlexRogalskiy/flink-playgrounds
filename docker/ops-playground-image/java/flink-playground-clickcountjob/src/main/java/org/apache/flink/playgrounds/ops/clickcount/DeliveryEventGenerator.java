@@ -1,8 +1,8 @@
 package org.apache.flink.playgrounds.ops.clickcount;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.playgrounds.ops.clickcount.records.TaxiRide;
-import org.apache.flink.playgrounds.ops.clickcount.records.TaxiRideEventSerializationSchema;
+import org.apache.flink.playgrounds.ops.clickcount.records.DeliveryRide;
+import org.apache.flink.playgrounds.ops.clickcount.records.DeliveryRideEventSerializationSchema;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -22,13 +22,11 @@ public class DeliveryEventGenerator {
 		Properties kafkaProps = createKafkaProperties(params);
 		KafkaProducer<byte[], byte[]> producer = new KafkaProducer<>(kafkaProps);
 
-		TaxiIterator taxiIterator = new TaxiIterator();
+		DeliveryIterator deliveryIterator = new DeliveryIterator();
 
 		while (true) {
-//			Random rnd = new Random(rideId);
-//			return 2013000000 + rnd.nextInt(NUMBER_OF_DRIVERS);
 			rideId++;
-			ProducerRecord<byte[], byte[]> record = new TaxiRideEventSerializationSchema(topic).serialize(taxiIterator.next(), null);
+			ProducerRecord<byte[], byte[]> record = new DeliveryRideEventSerializationSchema(topic).serialize(deliveryIterator.next(), null);
 
 			producer.send(record);
 
@@ -46,15 +44,15 @@ public class DeliveryEventGenerator {
 	}
 
 
-	static class TaxiIterator  {
+	static class DeliveryIterator {
 		private Map<String, Long> nextTimestampPerKey;
 
-		TaxiIterator() {
+		DeliveryIterator() {
 			nextTimestampPerKey = new HashMap<>();
 		}
 
-		TaxiRide next() {
-			return new TaxiRide(true, nextTimestamp("begin"), nextTimestamp("end"), rideId);
+		DeliveryRide next() {
+			return new DeliveryRide(true, nextTimestamp("begin"), nextTimestamp("end"), rideId);
 		}
 
 		private Date nextTimestamp(String page) {

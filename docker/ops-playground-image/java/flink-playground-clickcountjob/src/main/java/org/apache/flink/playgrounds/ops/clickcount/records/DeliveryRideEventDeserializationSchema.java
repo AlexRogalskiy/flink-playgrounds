@@ -7,24 +7,24 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 
 import java.io.IOException;
 
-public class TaxiRideEventDeserializationSchema implements DeserializationSchema<TaxiRide> {
+public class DeliveryRideEventDeserializationSchema implements DeserializationSchema<DeliveryRide> {
     private static final long serialVersionUID = 1L;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public TaxiRide deserialize(byte[] message) throws IOException {
-        return objectMapper.readValue(message, TaxiRide.class);
+    public DeliveryRide deserialize(byte[] message) throws IOException {
+        return objectMapper.readValue(message, DeliveryRide.class);
     }
 
     @Override
-    public boolean isEndOfStream(TaxiRide nextElement) {
+    public boolean isEndOfStream(DeliveryRide nextElement) {
         return false;
     }
 
     @Override
-    public TypeInformation<TaxiRide> getProducedType() {
-        return TypeInformation.of(TaxiRide.class);
+    public TypeInformation<DeliveryRide> getProducedType() {
+        return TypeInformation.of(DeliveryRide.class);
     }
 
 }

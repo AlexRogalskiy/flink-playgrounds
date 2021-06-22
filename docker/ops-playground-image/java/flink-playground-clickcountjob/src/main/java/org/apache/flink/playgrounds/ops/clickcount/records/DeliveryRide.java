@@ -6,7 +6,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonFor
 import java.util.Date;
 
 
-public class TaxiRide {
+public class DeliveryRide {
     public long rideId;
     public boolean isStart;
 
@@ -19,14 +19,14 @@ public class TaxiRide {
     public float endLon;
     public float endLat;
     public short passengerCnt;
-    public long taxiId;
-    public long driverId;
+    public long deliveryId;
+    public long courierId;
 
 
-    public TaxiRide() {
+    public DeliveryRide() {
     }
 
-    public TaxiRide(boolean isStart, Date startTime, Date endTime, Long rideId) {
+    public DeliveryRide(boolean isStart, Date startTime, Date endTime, Long rideId) {
         DataGenerator g = new DataGenerator(rideId);
 
         this.rideId = rideId;
@@ -38,13 +38,13 @@ public class TaxiRide {
         this.endLon = g.endLon();
         this.endLat = g.endLat();
         this.passengerCnt = g.passengerCnt();
-        this.taxiId = g.taxiId();
-        this.driverId = g.driverId();
+        this.deliveryId = g.deliveryId();
+        this.courierId = g.courierId();
     }
 
-    public TaxiRide(long rideId, boolean isStart, Date startTime, Date endTime,
-                    float startLon, float startLat, float endLon, float endLat,
-                    short passengerCnt, long taxiId, long driverId) {
+    public DeliveryRide(long rideId, boolean isStart, Date startTime, Date endTime,
+                        float startLon, float startLat, float endLon, float endLat,
+                        short passengerCnt, long deliveryId, long courierId) {
         this.rideId = rideId;
         this.isStart = isStart;
         this.startTime = startTime;
@@ -54,8 +54,8 @@ public class TaxiRide {
         this.endLon = endLon;
         this.endLat = endLat;
         this.passengerCnt = passengerCnt;
-        this.taxiId = taxiId;
-        this.driverId = driverId;
+        this.deliveryId = deliveryId;
+        this.courierId = courierId;
     }
 
 
@@ -71,15 +71,15 @@ public class TaxiRide {
                 endLon + "," +
                 endLat + "," +
                 passengerCnt + "," +
-                taxiId + "," +
-                driverId;
+                deliveryId + "," +
+                courierId;
     }
 
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof TaxiRide &&
-                this.rideId == ((TaxiRide) other).rideId;
+        return other instanceof DeliveryRide &&
+                this.rideId == ((DeliveryRide) other).rideId;
     }
 
     @Override

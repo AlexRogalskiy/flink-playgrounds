@@ -10,23 +10,23 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import javax.annotation.Nullable;
 
 
-public class TaxiRideEventSerializationSchema implements KafkaSerializationSchema<TaxiRide> {
+public class DeliveryRideEventSerializationSchema implements KafkaSerializationSchema<DeliveryRide> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private String topic;
 
-    public TaxiRideEventSerializationSchema(){ }
+    public DeliveryRideEventSerializationSchema(){ }
 
-    public TaxiRideEventSerializationSchema(String topic) {
+    public DeliveryRideEventSerializationSchema(String topic) {
         this.topic = topic;
     }
 
     @Override
-    public ProducerRecord<byte[], byte[]> serialize(TaxiRide taxiRide, @Nullable Long aLong) {
+    public ProducerRecord<byte[], byte[]> serialize(DeliveryRide deliveryRide, @Nullable Long aLong) {
         try {
             //if topic is null, default topic will be used
-            return new ProducerRecord<>(topic, objectMapper.writeValueAsBytes(taxiRide));
+            return new ProducerRecord<>(topic, objectMapper.writeValueAsBytes(deliveryRide));
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Could not serialize record: " + taxiRide, e);
+            throw new IllegalArgumentException("Could not serialize record: " + deliveryRide, e);
         }
     }
 }

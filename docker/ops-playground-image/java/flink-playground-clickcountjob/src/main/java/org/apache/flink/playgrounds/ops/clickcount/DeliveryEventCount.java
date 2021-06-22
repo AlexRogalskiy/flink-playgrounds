@@ -6,11 +6,12 @@ import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.file.sink.FileSink;
 import org.apache.flink.core.fs.Path;
-import org.apache.flink.playgrounds.ops.clickcount.records.TaxiRide;
-import org.apache.flink.playgrounds.ops.clickcount.records.TaxiRideEventDeserializationSchema;
+import org.apache.flink.playgrounds.ops.clickcount.records.DeliveryRide;
+import org.apache.flink.playgrounds.ops.clickcount.records.DeliveryRideEventDeserializationSchema;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.filesystem.RollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -36,17 +37,13 @@ public class DeliveryEventCount {
 		kafkaProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
 		kafkaProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "click-event-count");
 
-		DataStream<TaxiRide> clicks =
-				env.addSource(new FlinkKafkaConsumer<>(inputTopic, new TaxiRideEventDeserializationSchema(), kafkaProps))
+		DataStream<DeliveryRide> eventSource =
+				env.addSource(new FlinkKafkaConsumer<>(inputTopic, new DeliveryRideEventDeserializationSchema(), kafkaProps))
 			.name("DeliveryEvent Source");
 
-		DataStream<String> statistics = clicks
-				.map(new MapFunction<TaxiRide, String>() {
-					@Override
-					public String map(TaxiRide ride) {
-						return  ride.toString();
-					}})
-				.name("DeliveryEvent Converter");
+		DataStream<String> eventProcessed = eventSource
+				.map(i -> i.toString())
+				.name("DeliveryEvent Mapper");
 
 		final FileSink<String> sink = FileSink
 				.forRowFormat(new Path("/tmp/flink-output"), new SimpleStringEncoder<String>("UTF-8"))
@@ -58,7 +55,7 @@ public class DeliveryEventCount {
 								.build())
 				.build();
 
-		statistics.sinkTo(sink);
+		eventProcessed.sinkTo(sink);
 
 		env.execute("Delivery Event Saving");
 	}
