@@ -7,15 +7,18 @@ services:
       - jobmanager
       - kafka
     command: "flink run -d /opt/DeliveryWriteFileJob.jar --bootstrap.servers kafka:9092 --checkpointing --event-time"
+#    command: "flink run -p 3 -d /opt/DeliveryWriteFileJob.jar --bootstrap.servers kafka:9092 --checkpointing --event-time"
     volumes:
       - ./conf:/opt/flink/conf
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
-  clickevent-generator:
+  # <editor-fold defaultstate="collapsed" desc="Aggregating relation">
+  delivery-generator:
     image: apache/flink-ops-playground:1-FLINK-1.12-scala_2.11
     command: "java -classpath /opt/DeliveryWriteFileJob.jar:/opt/flink/lib/* org.apache.flink.playgrounds.ops.clickcount.DeliveryEventGenerator --bootstrap.servers kafka:9092 --topic input"
     depends_on:
       - kafka
+  # </editor-fold>
   jobmanager:
     image: apache/flink:1.12.1-scala_2.11-java8
     command: "jobmanager.sh start-foreground"
@@ -28,6 +31,8 @@ services:
       - ./tmp/flink-output:/tmp/flink-output
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    env_file:
+      - ./hadoop.env
   taskmanager:
     image: apache/flink:1.12.1-scala_2.11-java8
     depends_on:
@@ -53,3 +58,29 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     ports:
       - 9094:9094
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - 9870:9870
+      - 9000:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+  datanode:
+      image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+      container_name: datanode
+      restart: always
+      volumes:
+        - hadoop_datanode:/hadoop/dfs/data
+      environment:
+        SERVICE_PRECONDITION: "namenode:9870"
+      env_file:
+        - ./hadoop.env
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
